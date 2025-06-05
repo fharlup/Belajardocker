@@ -1,0 +1,117 @@
+services:
+  # Service Frontend Apotek
+  frontend-apotek:
+    build:
+      context: ./apotek-ui # Path relatif ke folder apotek-ui
+      dockerfile: Dockerfile
+    container_name: frontend-apotek
+    ports:
+      - "8080:80" # Akses UI Apotek dari http://localhost:8080
+    restart: always
+    depends_on:
+      - apotek-service
+      - hospital-service
+    networks:
+      - microservice-net
+
+  # Service Frontend Hospital (BARU)
+  frontend-hospital:
+    build:
+      context: ./hospital-ui # Path relatif ke folder hospital-ui
+      dockerfile: Dockerfile
+    container_name: frontend-hospital
+    ports:
+      - "8081:80" # Akses UI Hospital dari http://localhost:8081
+    restart: always
+    depends_on:
+      - apotek-service
+      - hospital-service
+    networks:
+      - microservice-net
+
+  # --- Service Backend (Tidak Berubah) ---
+  hospital-service:
+    build: ./hospital-service
+    # ... (konfigurasi sisanya tetap sama)
+    container_name: hospital-service
+    ports:
+      - "3001:3001"
+    restart: on-failure
+    environment:
+      - PORT=3001
+      - DB_HOST=db_hospital
+      - DB_USER=root
+      - DB_PASS=a
+      - DB_NAME=hospital_db
+    depends_on:
+      db_hospital: { condition: service_healthy }
+    networks:
+      - microservice-net
+
+  db_hospital:
+    image: mysql:8.0
+    # ... (konfigurasi sisanya tetap sama)
+    container_name: db_hospital
+    restart: always
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    environment:
+      MYSQL_ROOT_PASSWORD: a
+      MYSQL_DATABASE: hospital_db
+    volumes:
+      - db_hospital_data:/var/lib/mysql
+      - ./hospital-service/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "33061:3306"
+    networks:
+      - microservice-net
+
+  apotek-service:
+    build: ./apotek-service
+    # ... (konfigurasi sisanya tetap sama)
+    container_name: apotek-service
+    ports:
+      - "3002:3002"
+    restart: on-failure
+    environment:
+      - PORT=3002
+      - DB_HOST=db_apotek
+      - DB_USER=root
+      - DB_PASS=a
+      - DB_NAME=apotek_db
+    depends_on:
+      db_apotek: { condition: service_healthy }
+    networks:
+      - microservice-net
+
+  db_apotek:
+    image: mysql:8.0
+    # ... (konfigurasi sisanya tetap sama)
+    container_name: db_apotek
+    restart: always
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    environment:
+      MYSQL_ROOT_PASSWORD: a
+      MYSQL_DATABASE: apotek_db
+    volumes:
+      - db_apotek_data:/var/lib/mysql
+      - ./apotek-service/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "33062:3306"
+    networks:
+      - microservice-net
+
+networks:
+  microservice-net:
+    driver: bridge
+
+volumes:
+  db_hospital_data:
+  db_apotek_data:

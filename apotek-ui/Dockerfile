@@ -1,0 +1,36 @@
+# ----- TAHAP 1: Build Aplikasi React -----
+# Gunakan image Node.js yang ringan sebagai dasar untuk tahap build
+FROM node:18-alpine AS builder
+
+# Set direktori kerja di dalam container
+WORKDIR /app
+
+# Copy package.json dan package-lock.json terlebih dahulu
+COPY package*.json ./
+
+# Install semua dependencies
+RUN npm install
+
+# Copy sisa kode sumber aplikasi
+COPY . .
+
+# Jalankan script build untuk membuat versi produksi yang statis
+RUN npm run build
+
+
+# ----- TAHAP 2: Sajikan dengan Nginx -----
+# Gunakan image Nginx yang sangat ringan untuk tahap produksi
+FROM nginx:stable-alpine
+
+# Copy hasil build dari tahap 'builder' ke direktori default Nginx
+# CATATAN: Pastikan nama folder ini 'dist' (untuk Vite) atau 'build' (untuk Create React App)
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Copy file konfigurasi Nginx kustom kita
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Expose port 80, port default untuk Nginx
+EXPOSE 80
+
+# Perintah untuk menjalankan Nginx
+CMD ["nginx", "-g", "daemon off;"]
