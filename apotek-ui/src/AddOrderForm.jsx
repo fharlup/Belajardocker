@@ -1,4 +1,3 @@
-// ... (impor dan fungsi lainnya tetap sama)
 import React, { useState } from 'react';
 
 function AddOrderForm({ onSuccess, onError }) {
@@ -14,7 +13,6 @@ function AddOrderForm({ onSuccess, onError }) {
         e.preventDefault();
         setMessage('');
         try {
-            // PERUBAHAN: URL diubah ke path proxy
             const response = await fetch('/api-apotek/orders', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -33,7 +31,6 @@ function AddOrderForm({ onSuccess, onError }) {
             onError(e.message);
         }
     };
-    // ... (return JSX tidak berubah)
     return (
         <div className="form-container">
           <h2>Tambah Order Baru</h2>

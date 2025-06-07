@@ -5,7 +5,6 @@ import AddSupplierForm from './AddSupplierForm';
 import AddOrderForm from './AddOrderForm';
 import AddPurchaseHistoryForm from './AddPurchaseHistoryForm';
 
-// --- PERUBAHAN KUNCI ADA DI SINI ---
 const APOTEK_API_URL = '/api-apotek'; // Path proxy untuk service apotek
 const HOSPITAL_API_URL = '/api-hospital'; // Path proxy untuk service hospital
 
@@ -54,7 +53,6 @@ function ApotekDashboard() {
             <DataViewer 
                 key={viewKey}
                 config={dataConfigs[activeView]} 
-                // Tentukan base URL mana yang akan digunakan berdasarkan view
                 apiBaseUrl={activeView === 'patients-from-hospital' ? HOSPITAL_API_URL : APOTEK_API_URL}
                 onError={setError}
             />

@@ -9,7 +9,6 @@ function DataViewer({ config, apiBaseUrl, onError }) {
       setLoading(true);
       onError(''); // Reset error setiap kali fetch baru
 
-      // PERUBAHAN: Menggabungkan base URL proxy dengan endpoint
       const fullUrl = `${apiBaseUrl}${config.endpoint}`;
 
       try {
@@ -18,8 +17,6 @@ function DataViewer({ config, apiBaseUrl, onError }) {
         
         const result = await response.json();
         
-        // Logika ini menangani response dari backend kita (yang punya {status: 'success'})
-        // dan juga response dari service lain yang mungkin langsung mengembalikan array data
         if (result.status === 'success') {
           setData(result.data);
         } else if (Array.isArray(result)) {
@@ -27,7 +24,6 @@ function DataViewer({ config, apiBaseUrl, onError }) {
         } else if (result.status === 'error'){
             throw new Error(result.message || 'Terjadi kesalahan pada server backend.');
         } else {
-            // Jika format tidak dikenali sama sekali
             setData([]);
         }
 

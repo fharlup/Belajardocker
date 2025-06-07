@@ -1,4 +1,3 @@
-// ... (impor dan fungsi lainnya tetap sama)
 import React, { useState } from 'react';
 
 function AddPurchaseHistoryForm({ onSuccess, onError }) {
@@ -14,7 +13,6 @@ function AddPurchaseHistoryForm({ onSuccess, onError }) {
         e.preventDefault();
         setMessage('');
         try {
-            // PERUBAHAN: URL diubah ke path proxy
             const response = await fetch('/api-apotek/purchase-history', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -34,7 +32,6 @@ function AddPurchaseHistoryForm({ onSuccess, onError }) {
             onError(e.message);
         }
     };
-    // ... (return JSX tidak berubah)
     return (
         <div className="form-container">
           <h2>Tambah Riwayat Pembelian Baru</h2>

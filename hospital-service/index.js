@@ -2,7 +2,6 @@ const express = require('express');
 const mysql = require('mysql2/promise');
 const axios = require('axios');
 
-// KONFIGURASI (Tetap sama)
 const app = express();
 app.use(express.json());
 const PORT = process.env.PORT || 3001;
@@ -25,13 +24,12 @@ async function initDb() {
 }
 
 // BAGIAN MODEL
-// Fungsi lama (Tetap sama)
-async function fetchAllFromTable(tableName) { /* ... (kode tidak berubah) ... */ }
-async function getPatientById(id) { /* ... (kode tidak berubah) ... */ }
-async function createPatient(data) { /* ... (kode tidak berubah) ... */ }
-async function createConsultation(data) { /* ... (kode tidak berubah) ... */ }
-async function createDoctor(data) { /* ... (kode tidak berubah) ... */ }
-async function createPrescription(data) { /* ... (kode tidak berubah) ... */ }
+async function fetchAllFromTable(tableName) { }
+async function getPatientById(id) { }
+async function createPatient(data) { }
+async function createConsultation(data) { }
+async function createDoctor(data) { }
+async function createPrescription(data) { }
 
 // --- FUNGSI BARU UNTUK INTEGRASI ---
 // Model untuk mengambil detail pasien lengkap dengan riwayatnya
@@ -54,14 +52,12 @@ async function getPatientDetailsById(id) {
 
 
 // BAGIAN CONTROLLER
-// Controller lama (Tetap sama)
-function createGetAllController(tableName) { /* ... (kode tidak berubah) ... */ }
-async function handleGetPatientById(req, res) { /* ... (kode tidak berubah) ... */ }
-function createPostController(modelFunction, requiredFields = []) { /* ... (kode tidak berubah) ... */ }
-async function getObatFromApotek(req, res) { /* ... (kode tidak berubah) ... */ }
+function createGetAllController(tableName) { }
+async function handleGetPatientById(req, res) { }
+function createPostController(modelFunction, requiredFields = []) { }
+async function getObatFromApotek(req, res) { }
 
 
-// --- CONTROLLER BARU UNTUK INTEGRASI ---
 // Controller untuk MENYEDIAKAN data detail pasien
 async function handleGetPatientDetailsById(req, res) {
     try {
@@ -91,7 +87,6 @@ async function handleCheckApotekStock(req, res) {
 }
 
 // BAGIAN ROUTES
-// --- GET Endpoints (Lama) ---
 app.get('/patients', createGetAllController('patients'));
 app.get('/patients/:id', handleGetPatientById);
 app.get('/consultations', createGetAllController('consultations'));
@@ -103,21 +98,20 @@ app.get('/obat-from-apotek', getObatFromApotek); // Integrasi #1
 app.get('/patients/:id/details', handleGetPatientDetailsById); // Menyediakan data untuk Apotek (Integrasi #2)
 app.get('/check-stock/:id', handleCheckApotekStock); // Memanggil Apotek (Integrasi #2)
 
-// --- POST Endpoints (Tetap sama) ---
+// --- POST Endpoints  ---
 app.post('/patients', createPostController(createPatient, ['name', 'age', 'address', 'phone']));
 app.post('/consultations', createPostController(createConsultation, ['patient_id', 'doctor_id', 'symptoms', 'diagnosis', 'date']));
 app.post('/doctors', createPostController(createDoctor, ['name', 'specialization']));
 app.post('/prescriptions', createPostController(createPrescription, ['consultation_id', 'medicine_name', 'dosage']));
 
-// Health check dan 404 handler (Tetap sama)
+// Health check dan 404 handler 
 app.get('/health', (req, res) => { res.status(200).json({ status: 'UP', service: 'Hospital Service' }); });
 app.use((req, res) => { res.status(404).json({ status: 'error', message: 'Endpoint not found' }); });
 
-// MENJALANKAN SERVER (Tetap sama)
+// MENJALANKAN SERVER 
 async function startServer() { await initDb(); app.listen(PORT, () => console.log(`Hospital service berjalan di http://localhost:${PORT}`)); }
 startServer();
 
-// IMPLEMENTASI FUNGSI YANG TIDAK BERUBAH (UNTUK KELENGKAPAN)
 async function fetchAllFromTable(tableName) { const [rows] = await pool.query(`SELECT * FROM ??`, [tableName]); return rows; }
 async function getPatientById(id) { const [rows] = await pool.query('SELECT * FROM patients WHERE id = ?', [id]); return rows[0]; }
 async function createPatient(data) { const { name, age, address, phone } = data; const [result] = await pool.query('INSERT INTO patients (name, age, address, phone) VALUES (?, ?, ?, ?)', [name, age, address, phone]); return { id: result.insertId, ...data }; }

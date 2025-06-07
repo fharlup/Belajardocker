@@ -147,7 +147,6 @@ app.post('/suppliers', createPostController(createSupplier));
 app.post('/orders', createPostController(createOrder));
 app.post('/purchase-history', createPostController(createPurchaseHistory));
 
-// Lainnya
 app.get('/health', (req, res) => res.status(200).json({ status: 'UP', service: 'Apotek Service' }));
 app.use((req, res) => res.status(404).json({ status: 'error', message: 'Endpoint not found' }));
 

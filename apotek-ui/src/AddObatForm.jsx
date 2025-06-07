@@ -1,8 +1,6 @@
-// ... (impor dan fungsi lainnya tetap sama)
 import React, { useState } from 'react';
 
 function AddObatForm({ onSuccess, onError }) {
-    // ... (state dan handler tidak berubah)
     const [formData, setFormData] = useState({ name: '', stock: '', price: '' });
     const [message, setMessage] = useState('');
 
@@ -15,7 +13,6 @@ function AddObatForm({ onSuccess, onError }) {
         e.preventDefault();
         setMessage('');
         try {
-            // PERUBAHAN: URL diubah ke path proxy
             const response = await fetch('/api-apotek/obat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -34,7 +31,6 @@ function AddObatForm({ onSuccess, onError }) {
             onError(e.message);
         }
     };
-    // ... (return JSX tidak berubah)
     return (
         <div className="form-container">
           <h2>Tambah Obat Baru</h2>
