@@ -35,7 +35,6 @@ function AddPurchaseHistoryForm({ onSuccess, onError }) {
     return (
         <div className="form-container">
           <h2>Tambah Riwayat Pembelian Baru</h2>
-          <p className="form-note">Catatan: Untuk UI sederhana ini, masukkan ID Pasien secara manual.</p>
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label>ID Pasien</label>
