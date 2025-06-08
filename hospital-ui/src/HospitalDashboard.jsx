@@ -65,14 +65,6 @@ const dataConfigs = {
         ],
         isExternal: true
     },
-    'health-statistics': {
-        title: 'Statistik Kesehatan Global', endpoint: '/health-statistics',
-        columns: [
-            { key: 'diseases', header: 'Penyakit' },
-            { key: 'locations', header: 'Lokasi' }
-        ],
-        isExternal: true
-    }
 };
 
 function HospitalDashboard() {
