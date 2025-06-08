@@ -1,39 +1,67 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-function AddDoctorForm({ onSuccess, onError }) {
+function AddDoctorForm({ onSuccess, onError, initialData, isUpdateMode }) {
   const [formData, setFormData] = useState({ name: '', specialization: '' });
-  const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    if (isUpdateMode && initialData) {
+      setFormData({
+        name: initialData.name || '',
+        specialization: initialData.specialization || '',
+      });
+    }
+  }, [isUpdateMode, initialData]);
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMessage('');
     try {
-      const response = await fetch('/api-hospital/doctors', {
-        method: 'POST',
+      const endpoint = isUpdateMode
+        ? `/api-hospital/doctors/${initialData.id}`
+        : '/api-hospital/doctors';
+      const method = isUpdateMode ? 'PUT' : 'POST';
+
+      const response = await fetch(endpoint, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
+
       const result = await response.json();
-      if (!response.ok || result.status !== 'success') throw new Error(result.message || 'Gagal');
-      setMessage('Dokter berhasil ditambahkan!');
+      if (!response.ok || result.status !== 'success') {
+        throw new Error(result.message || `Gagal ${isUpdateMode ? 'mengupdate' : 'menambahkan'} dokter.`);
+      }
+
+      alert(`Dokter berhasil ${isUpdateMode ? 'diupdate' : 'ditambahkan'}!`);
       onSuccess();
-    } catch (e) {
-      onError(e.message);
+    } catch (err) {
+      onError(err.message);
     }
   };
 
   return (
     <div className="form-container">
-      <h2>Tambah Dokter Baru</h2>
+      <h2>{isUpdateMode ? 'Update Data Dokter' : 'Tambah Dokter Baru'}</h2>
       <form onSubmit={handleSubmit}>
-        <input name="name" value={formData.name} onChange={handleChange} placeholder="Nama Dokter" required />
-        <input name="specialization" value={formData.specialization} onChange={handleChange} placeholder="Spesialisasi" required />
-        <button type="submit">Simpan Dokter</button>
+        <div className="form-group">
+          <label htmlFor="name">Nama Dokter</label>
+          <input id="name" name="name" value={formData.name} onChange={handleChange} required />
+        </div>
+        <div className="form-group">
+          <label htmlFor="specialization">Spesialisasi</label>
+          <input
+            id="specialization"
+            name="specialization"
+            value={formData.specialization}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <button type="submit">{isUpdateMode ? 'Simpan Perubahan' : 'Simpan Dokter'}</button>
       </form>
-      {message && <p className="success-message">{message}</p>}
     </div>
   );
 }
+
 export default AddDoctorForm;
