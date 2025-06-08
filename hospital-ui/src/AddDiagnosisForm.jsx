@@ -1,22 +1,19 @@
 import React, { useState, useEffect } from 'react';
 
-function AddDiagnosisForm({ onSuccess, onError, initialData, isUpdateMode, consultationId }) {
+function AddDiagnosisForm({ onSuccess, onError, initialData, isUpdateMode }) {
   const [formData, setFormData] = useState({
-    consultation_id: consultationId || '', // Menerima consultationId dari props
-    diagnosis_text: '',
+    consultation_id: '',
+    diagnosa: '',
   });
 
   useEffect(() => {
     if (isUpdateMode && initialData) {
       setFormData({
         consultation_id: initialData.consultation_id || '',
-        diagnosis_text: initialData.diagnosis_text || '',
+        diagnosa: initialData.diagnosa || '',
       });
-    } else if (consultationId) {
-      // Jika mode tambah dan consultationId disediakan, set otomatis
-      setFormData(prev => ({ ...prev, consultation_id: consultationId }));
     }
-  }, [initialData, isUpdateMode, consultationId]);
+  }, [initialData, isUpdateMode]);
 
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -25,8 +22,8 @@ function AddDiagnosisForm({ onSuccess, onError, initialData, isUpdateMode, consu
     e.preventDefault();
     try {
       const endpoint = isUpdateMode
-        ? `/api-hospital/diagnoses/${initialData.id}` // Jika update, gunakan ID diagnosa yang ada
-        : '/api-hospital/diagnoses';
+        ? `/api-hospital/diagnosis/${initialData.id}`
+        : '/api-hospital/diagnosis';
       const method = isUpdateMode ? 'PUT' : 'POST';
 
       const response = await fetch(endpoint, {
@@ -34,7 +31,7 @@ function AddDiagnosisForm({ onSuccess, onError, initialData, isUpdateMode, consu
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
-          consultation_id: parseInt(formData.consultation_id, 10), // Pastikan ID adalah integer
+          consultation_id: parseInt(formData.consultation_id, 10),
         }),
       });
 
@@ -42,18 +39,12 @@ function AddDiagnosisForm({ onSuccess, onError, initialData, isUpdateMode, consu
       if (!response.ok || result.status !== 'success') {
         throw new Error(
           result.message ||
-          `Gagal ${isUpdateMode ? 'mengupdate' : 'menambahkan'} diagnosa.`
+            `Gagal ${isUpdateMode ? 'mengupdate' : 'menambahkan'} diagnosa.`
         );
       }
 
       alert(`Diagnosa berhasil ${isUpdateMode ? 'diupdate' : 'ditambahkan'}!`);
-      onSuccess(); // Panggil onSuccess untuk memberi tahu komponen induk agar merefresh data
-      
-      // Reset form jika dalam mode tambah setelah berhasil submit
-      if (!isUpdateMode) {
-        setFormData(prev => ({ ...prev, diagnosis_text: '' }));
-      }
-
+      onSuccess();
     } catch (e) {
       onError(e.message);
     }
@@ -64,29 +55,26 @@ function AddDiagnosisForm({ onSuccess, onError, initialData, isUpdateMode, consu
       <h2>{isUpdateMode ? 'Update Diagnosa' : 'Tambah Diagnosa Baru'}</h2>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label htmlFor="consultation_id">ID Konsultasi</label>
+          <label>ID Konsultasi</label>
           <input
-            id="consultation_id"
             name="consultation_id"
             type="number"
             value={formData.consultation_id}
             onChange={handleChange}
             required
-            disabled={isUpdateMode || consultationId} 
           />
         </div>
         <div className="form-group">
-          <label htmlFor="diagnosis_text">Teks Diagnosa</label>
+          <label>Diagnosa Penyakit</label>
           <textarea
-            id="diagnosis_text"
-            name="diagnosis_text"
-            value={formData.diagnosis_text}
+            name="diagnosa"
+            value={formData.diagnosa}
             onChange={handleChange}
             required
           />
         </div>
         <button type="submit">
-          {isUpdateMode ? 'Simpan Perubahan Diagnosa' : 'Simpan Diagnosa'}
+          {isUpdateMode ? 'Simpan Perubahan' : 'Simpan Diagnosa'}
         </button>
       </form>
     </div>

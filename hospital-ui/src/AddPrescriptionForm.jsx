@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 
-function AddPrescriptionForm({ onSuccess, onError, initialData, isUpdateMode }) {
+function AddPrescriptionForm({ onSuccess, onError, initialData, isUpdateMode, diagnosisId }) {
   const [formData, setFormData] = useState({
-    consultation_id: '',
+    diagnosis_id: diagnosisId || '', // Menerima diagnosisId dari props
     medicine_name: '',
     dosage: ''
   });
@@ -10,12 +10,15 @@ function AddPrescriptionForm({ onSuccess, onError, initialData, isUpdateMode }) 
   useEffect(() => {
     if (isUpdateMode && initialData) {
       setFormData({
-        consultation_id: initialData.consultation_id || '',
+        diagnosis_id: initialData.diagnosis_id || '',
         medicine_name: initialData.medicine_name || '',
         dosage: initialData.dosage || ''
       });
+    } else if (diagnosisId) {
+      // Jika mode tambah dan diagnosisId disediakan, set otomatis
+      setFormData(prev => ({ ...prev, diagnosis_id: diagnosisId }));
     }
-  }, [initialData, isUpdateMode]);
+  }, [initialData, isUpdateMode, diagnosisId]);
 
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -24,7 +27,7 @@ function AddPrescriptionForm({ onSuccess, onError, initialData, isUpdateMode }) 
     e.preventDefault();
     try {
       const endpoint = isUpdateMode
-        ? `/api-hospital/prescriptions/${initialData.id}`
+        ? `/api-hospital/prescriptions/${initialData.id}` // Jika update, gunakan ID resep yang ada
         : '/api-hospital/prescriptions';
       const method = isUpdateMode ? 'PUT' : 'POST';
 
@@ -33,7 +36,7 @@ function AddPrescriptionForm({ onSuccess, onError, initialData, isUpdateMode }) 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
-          consultation_id: parseInt(formData.consultation_id, 10),
+          diagnosis_id: parseInt(formData.diagnosis_id, 10), // Pastikan ID adalah integer
         }),
       });
 
@@ -41,12 +44,18 @@ function AddPrescriptionForm({ onSuccess, onError, initialData, isUpdateMode }) 
       if (!response.ok || result.status !== 'success') {
         throw new Error(
           result.message ||
-            `Gagal ${isUpdateMode ? 'mengupdate' : 'menambahkan'} resep.`
+          `Gagal ${isUpdateMode ? 'mengupdate' : 'menambahkan'} resep.`
         );
       }
 
       alert(`Resep berhasil ${isUpdateMode ? 'diupdate' : 'ditambahkan'}!`);
-      onSuccess();
+      onSuccess(); // Panggil onSuccess untuk memberi tahu komponen induk agar merefresh data
+      
+      // Reset form jika dalam mode tambah setelah berhasil submit
+      if (!isUpdateMode) {
+        setFormData(prev => ({ ...prev, medicine_name: '', dosage: '' }));
+      }
+
     } catch (e) {
       onError(e.message);
     }
@@ -55,40 +64,43 @@ function AddPrescriptionForm({ onSuccess, onError, initialData, isUpdateMode }) 
   return (
     <div className="form-container">
       <h2>{isUpdateMode ? 'Update Resep' : 'Tambah Resep Baru'}</h2>
-      <p className="form-note">Catatan: Masukkan ID Konsultasi dari data konsultasi yang sudah ada.</p>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label>ID Konsultasi</label>
+          <label htmlFor="diagnosis_id">ID Diagnosa</label>
           <input
-            name="consultation_id"
+            id="diagnosis_id"
+            name="diagnosis_id"
             type="number"
-            value={formData.consultation_id}
+            value={formData.diagnosis_id}
             onChange={handleChange}
             required
+            disabled={isUpdateMode || diagnosisId} 
           />
         </div>
         <div className="form-group">
-          <label>Nama Obat</label>
+          <label htmlFor="medicine_name">Nama Obat</label>
           <input
+            id="medicine_name"
             name="medicine_name"
+            type="text"
             value={formData.medicine_name}
             onChange={handleChange}
-            placeholder="Contoh: Paracetamol 500mg"
             required
           />
         </div>
         <div className="form-group">
-          <label>Dosis</label>
+          <label htmlFor="dosage">Dosis</label>
           <input
+            id="dosage"
             name="dosage"
+            type="text"
             value={formData.dosage}
             onChange={handleChange}
-            placeholder="Contoh: 3 x 1 hari"
             required
           />
         </div>
         <button type="submit">
-          {isUpdateMode ? 'Simpan Perubahan' : 'Simpan Resep'}
+          {isUpdateMode ? 'Simpan Perubahan Resep' : 'Simpan Resep'}
         </button>
       </form>
     </div>
