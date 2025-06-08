@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-function AddPatientForm({ onSuccess, onError }) {
- function AddPatientForm({ onSuccess, onError, initialData, isUpdateMode }) {
+function AddPatientForm({ onSuccess, onError, initialData, isUpdateMode }) {
   const [formData, setFormData] = useState({ name: '', age: '', address: '', phone: '' });
 
   useEffect(() => {
@@ -63,5 +62,5 @@ function AddPatientForm({ onSuccess, onError }) {
     </div>
   );
 }
-}
+
 export default AddPatientForm;

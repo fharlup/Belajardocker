@@ -305,9 +305,6 @@ function ApotekDashboard() {
                     setCurrentError('');
                 }}>Lihat Pasien (dari Hospital)</button>
 
-                {(!showAddForm && !showEditForm) && ( 
-                  <button onClick={handlePrint} className="button-print">Cetak Daftar Ini</button>
-                )}
             </nav>
 
             {displayContent()}
