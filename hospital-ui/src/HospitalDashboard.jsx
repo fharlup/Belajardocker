@@ -96,11 +96,6 @@ function HospitalDashboard() {
         <button className="add-btn" onClick={() => handleNavClick('addConsultation')}>+ Konsultasi</button>
         <button className="add-btn" onClick={() => handleNavClick('addPrescription')}>+ Resep</button>
       </nav>
-      <nav className="navigation">
-        <p><strong>Aksi Manual:</strong></p>
-        <button className="edit-btn" onClick={() => handleNavClick('manageDoctor')}>Kelola Dokter by ID</button>
-        {/* Anda bisa menambahkan tombol serupa untuk entitas lain di sini */}
-      </nav>
 
       {/* Bagian Konten Utama */}
       <div className="content">
