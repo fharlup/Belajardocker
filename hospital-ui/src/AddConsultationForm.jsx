@@ -31,7 +31,6 @@ function AddConsultationForm({ onSuccess, onError }) {
   return (
     <div className="form-container">
       <h2>Tambah Konsultasi Baru</h2>
-      <p className="form-note">Catatan: Masukkan ID Pasien dan Dokter secara manual. Di aplikasi nyata, ini biasanya berupa dropdown.</p>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
             <label>ID Pasien</label>

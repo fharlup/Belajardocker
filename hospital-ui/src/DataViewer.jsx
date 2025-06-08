@@ -47,12 +47,45 @@ function DataViewer({ config, apiBaseUrl, onError, onDelete, onUpdate }) {
               <tr key={item.id || index}>
                 {config.columns.map((col) => (
                   <td key={col.key} data-label={col.header}>
-                    {col.key === 'price' ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(item[col.key]) : item[col.key]}
+                    {col.key === 'price'
+                      ? new Intl.NumberFormat('id-ID', {
+                          style: 'currency',
+                          currency: 'IDR',
+                          minimumFractionDigits: 0
+                        }).format(item[col.key])
+                      : item[col.key]}
                   </td>
                 ))}
                 <td data-label="Aksi">
-                  <button className="edit-btn" onClick={() => onUpdate(item)}>Update</button>
-                  <button className="delete-btn" onClick={() => onDelete(item)}>Delete</button>
+                  <button
+                    className="icon-btn edit"
+                    onClick={() => onUpdate(item)}
+                    title="Edit"
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      color: '#4caf50',
+                      fontSize: '18px',
+                      marginRight: '8px',
+                    }}
+                  >
+                    ✏️
+                  </button>
+                  <button
+                    className="icon-btn delete"
+                    onClick={() => onDelete(item)}
+                    title="Hapus"
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      color: '#f44336',
+                      fontSize: '18px',
+                    }}
+                  >
+                    🗑️
+                  </button>
                 </td>
               </tr>
             ))}
