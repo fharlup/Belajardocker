@@ -39,7 +39,7 @@ const dataConfigs = {
       { key: 'id', header: 'ID' },
       { key: 'supplier_id', header: 'ID Supplier' },
       { key: 'order_date', header: 'Tanggal Order' },
-      { key: 'status', header: 'Status' },
+      { key: 'quantity', header: 'quantity' },
     ],
   },
   'purchase-history': {
@@ -50,7 +50,7 @@ const dataConfigs = {
       { key: 'id', header: 'ID' },
       { key: 'order_id', header: 'ID Order' },
       { key: 'purchase_date', header: 'Tanggal Pembelian' },
-      { key: 'total_price', header: 'Total Harga (Rp)' },
+      { key: 'medicine_name', header: 'medicine_name' },
     ],
   },
   'patients-from-hospital': {
