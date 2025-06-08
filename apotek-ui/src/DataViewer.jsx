@@ -1,6 +1,7 @@
+// apotek-frontend/src/DataViewer.js
 import React, { useState, useEffect } from 'react';
 
-function DataViewer({ config, apiBaseUrl, onError }) {
+function DataViewer({ config, apiBaseUrl, onError, refreshTrigger }) { 
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -20,23 +21,25 @@ function DataViewer({ config, apiBaseUrl, onError }) {
         if (result.status === 'success') {
           setData(result.data);
         } else if (Array.isArray(result)) {
+          // Jika respons langsung berupa array data tanpa status 'success'
           setData(result);
         } else if (result.status === 'error'){
             throw new Error(result.message || 'Terjadi kesalahan pada server backend.');
         } else {
-            setData([]);
+            // Jika format tidak dikenali dan bukan error, set data kosong
+            setData([]); 
         }
 
       } catch (e) {
         onError(e.message);
-        setData([]);
+        setData([]); // Kosongkan data saat terjadi error
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [config, apiBaseUrl, onError]);
+  }, [config, apiBaseUrl, onError, refreshTrigger]); // refreshTrigger memicu re-fetch
 
   if (loading) {
     return <p>Loading {config.title}...</p>;
@@ -49,15 +52,21 @@ function DataViewer({ config, apiBaseUrl, onError }) {
         <table>
           <thead>
             <tr>
-              {config.columns.map((col) => <th key={col.key}>{col.header}</th>)}
+              {config.columns.map((col) => (
+                <th key={col.key}>{col.header}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
             {data.map((item, index) => (
-              <tr key={item.id || index}>
+              <tr key={item.id || index}> 
                 {config.columns.map((col) => (
                   <td key={col.key}>
-                    {col.key === 'price' ? new Intl.NumberFormat('id-ID').format(item[col.key]) : item[col.key]}
+                    {/* Menggunakan fungsi render kustom jika disediakan (misal untuk tombol aksi) */}
+                    {col.render ? col.render(item) : (
+                      // Memformat harga jika key adalah 'price'
+                      col.key === 'price' ? new Intl.NumberFormat('id-ID').format(item[col.key]) : item[col.key]
+                    )}
                   </td>
                 ))}
               </tr>

@@ -1,6 +1,7 @@
+// src/App.js
 import React from 'react';
-import ApotekDashboard from './ApotekDashboard';
-import './App.css'; 
+import ApotekDashboard from './ApotekDashboard'; // Pastikan path ini benar
+import './App.css'; // File CSS untuk styling global atau App component
 
 function App() {
   return (
