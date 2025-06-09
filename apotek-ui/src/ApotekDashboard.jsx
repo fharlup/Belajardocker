@@ -54,11 +54,13 @@ const dataConfigs = {
     ],
   },
   'patients-from-hospital': {
-    title: 'Diganosa',
-    endpoint: '/diagnoses',
+    title: 'Diagnosa',
+    endpoint: '/diagnoses',  // <-- endpoint diubah di sini
     columns: [
       { key: 'id', header: 'ID' },
+      { key: 'consultation_id', header: 'Consultation ID' },
       { key: 'diagnosis_text', header: 'Nama Pasien' },
+      { key: 'diagnosis_date', header: 'Tanggal Diagnosis' },
     ],
   },
 };
@@ -128,9 +130,8 @@ function ApotekDashboard() {
   const apiBaseUrl = activeView === 'patients-from-hospital' ? HOSPITAL_API_URL : APOTEK_API_URL;
 
   return (
-
     <div className="container">
-        <header>
+      <header>
         <h1>Sistem Informasi Apotek</h1>
       </header>
       <nav className="navigation">

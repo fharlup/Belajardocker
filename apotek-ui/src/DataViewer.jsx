@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from 'react';
 
+function formatDate(dateString) {
+  if (!dateString) return '';
+  const options = { year: 'numeric', month: 'long', day: 'numeric' };
+  const date = new Date(dateString);
+  return date.toLocaleDateString('id-ID', options);
+}
+
 function DataViewer({ config, apiBaseUrl, onError, onUpdate, onDelete, refreshTrigger }) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -25,19 +32,18 @@ function DataViewer({ config, apiBaseUrl, onError, onUpdate, onDelete, refreshTr
         } else if (result.status === 'error') {
           throw new Error(result.message || 'Terjadi kesalahan pada server backend.');
         } else {
-          // Jika format tidak dikenali dan bukan error, set data kosong
           setData([]);
         }
       } catch (e) {
         onError(e.message);
-        setData([]); // Kosongkan data saat terjadi error
+        setData([]);
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [config, apiBaseUrl, onError, refreshTrigger]); // refreshTrigger memicu re-fetch
+  }, [config, apiBaseUrl, onError, refreshTrigger]);
 
   if (loading) {
     return <p>Loading {config.title}...</p>;
@@ -59,19 +65,26 @@ function DataViewer({ config, apiBaseUrl, onError, onUpdate, onDelete, refreshTr
           <tbody>
             {data.map((item, index) => (
               <tr key={item.id || index}>
-                {config.columns.map((col) => (
-                  <td key={col.key}>
-                    {col.render
-                      ? col.render(item)
-                      : col.key === 'price'
-                      ? new Intl.NumberFormat('id-ID', {
-                          style: 'currency',
-                          currency: 'IDR',
-                          minimumFractionDigits: 0,
-                        }).format(item[col.key])
-                      : item[col.key]}
-                  </td>
-                ))}
+                {config.columns.map((col) => {
+                  let cellContent = null;
+
+                  if (col.render) {
+                    cellContent = col.render(item);
+                  } else if (col.key === 'price') {
+                    cellContent = new Intl.NumberFormat('id-ID', {
+                      style: 'currency',
+                      currency: 'IDR',
+                      minimumFractionDigits: 0,
+                    }).format(item[col.key]);
+                  } else if (col.key.toLowerCase().includes('date')) {
+                    // Format tanggal secara umum untuk kolom yang mengandung kata 'date'
+                    cellContent = formatDate(item[col.key]);
+                  } else {
+                    cellContent = item[col.key];
+                  }
+
+                  return <td key={col.key}>{cellContent}</td>;
+                })}
                 {(onUpdate || onDelete) && (
                   <td>
                     {onUpdate && (
