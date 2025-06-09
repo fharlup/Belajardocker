@@ -1,125 +1,104 @@
 import React, { useState, useEffect } from 'react';
-import AddPrescriptionForm from './AddPrescriptionForm';
-import AddHealthMonitoringForm from './AddHealthMonitoringForm'; // Import komponen baru
 
-function DiagnosisDetailPage({ diagnosisId }) {
-  const [diagnosis, setDiagnosis] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [showAddPrescription, setShowAddPrescription] = useState(false);
-  const [prescriptionToEdit, setPrescriptionToEdit] = useState(null);
-  const [showAddMonitoring, setShowAddMonitoring] = useState(false); // State baru untuk monitoring
-  const [monitoringToEdit, setMonitoringToEdit] = useState(null); // State baru untuk data monitoring yang akan di-edit
-
-  const fetchDiagnosisDetails = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetch(`/api-hospital/diagnoses/${diagnosisId}`);
-      const result = await response.json();
-      if (!response.ok || result.status !== 'success') {
-        throw new Error(result.message || 'Gagal mengambil detail diagnosa.');
-      }
-      setDiagnosis(result.data);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+function AddHealthMonitoringForm({ onSuccess, onError, initialData, isUpdateMode, diagnosisId }) {
+  const [formData, setFormData] = useState({
+    diagnosis_id: '',
+    kota_kejadian: '',
+  });
 
   useEffect(() => {
-    if (diagnosisId) {
-      fetchDiagnosisDetails();
+    if (isUpdateMode && initialData) {
+      setFormData({
+        diagnosis_id: initialData.diagnosis_id || '',
+        kota_kejadian: initialData.kota_kejadian || '',
+      });
     }
-  }, [diagnosisId]);
+  }, [initialData, isUpdateMode]);
 
-  const handlePrescriptionSuccess = () => {
-    fetchDiagnosisDetails();
-    setShowAddPrescription(false);
-    setPrescriptionToEdit(null);
+  useEffect(() => {
+    // Set diagnosis_id otomatis di mode tambah kalau props ada
+    if (!isUpdateMode && diagnosisId) {
+      setFormData(prev => ({ ...prev, diagnosis_id: diagnosisId }));
+    }
+  }, [diagnosisId, isUpdateMode]);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Handler baru untuk sukses monitoring
-  const handleMonitoringSuccess = () => {
-    fetchDiagnosisDetails();
-    setShowAddMonitoring(false); // Sembunyikan form tambah monitoring
-    setMonitoringToEdit(null); // Reset mode edit
-  };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  const handleError = (message) => {
-    setError(message);
-  };
+    // Validasi manual
+    if (!formData.diagnosis_id || !formData.kota_kejadian.trim()) {
+      onError('Mohon isi semua field terlebih dahulu.');
+      return;
+    }
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
-  if (!diagnosis) return <div>Diagnosa tidak ditemukan.</div>;
+    const endpoint = isUpdateMode
+      ? `/api-hospital/health-monitorings/${initialData.id}`
+      : '/api-hospital/health-monitorings';
+
+    const method = isUpdateMode ? 'PUT' : 'POST';
+
+    try {
+      const response = await fetch(endpoint, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          diagnosis_id: parseInt(formData.diagnosis_id, 10),
+          kota_kejadian: formData.kota_kejadian.trim(),
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || result.status !== 'success') {
+      
+      }
+
+      alert(`Monitoring kesehatan berhasil ${isUpdateMode ? 'diupdate' : 'ditambahkan'}!`);
+      onSuccess();
+
+      if (!isUpdateMode) {
+        setFormData(prev => ({ ...prev, kota_kejadian: '' }));
+      }
+    } catch (err) {
+    
+    }
+  };
 
   return (
-    <div>
-      <h1>Detail Diagnosa</h1>
-      <p>ID Diagnosa: {diagnosis.id}</p>
-      <p>ID Konsultasi: {diagnosis.consultation_id}</p>
-      <p>Teks Diagnosa: {diagnosis.diagnosis_text}</p>
-      <p>Tanggal Diagnosa: {new Date(diagnosis.diagnosis_date).toLocaleDateString()}</p>
-
-      <hr />
-      <h2>Daftar Resep Obat</h2>
-      {diagnosis.prescriptions && diagnosis.prescriptions.length > 0 ? (
-        <ul>
-          {diagnosis.prescriptions.map(pres => (
-            <li key={pres.id}>
-              {pres.medicine_name} - {pres.dosage}
-              <button onClick={() => { setPrescriptionToEdit(pres); setShowAddPrescription(true); }}>Edit</button>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>Belum ada resep untuk diagnosa ini.</p>
-      )}
-      <button onClick={() => { setShowAddPrescription(true); setPrescriptionToEdit(null); }}>
-        Tambah Resep Baru
-      </button>
-
-      {showAddPrescription && (
-        <AddPrescriptionForm
-          onSuccess={handlePrescriptionSuccess}
-          onError={handleError}
-          initialData={prescriptionToEdit}
-          isUpdateMode={!!prescriptionToEdit}
-          diagnosisId={diagnosis.id}
-        />
-      )}
-
-      <hr />
-      <h2>Catatan Monitoring Kesehatan</h2>
-      {diagnosis.health_monitorings && diagnosis.health_monitorings.length > 0 ? (
-        <ul>
-          {diagnosis.health_monitorings.map(monitor => (
-            <li key={monitor.id}>
-              {monitor.kota_kejadian} ({new Date(monitor.monitoring_date).toLocaleDateString()})
-              <button onClick={() => { setMonitoringToEdit(monitor); setShowAddMonitoring(true); }}>Edit</button>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>Belum ada catatan monitoring kesehatan.</p>
-      )}
-      <button onClick={() => { setShowAddMonitoring(true); setMonitoringToEdit(null); }}>
-        Tambah Catatan Monitoring
-      </button>
-
-      {showAddMonitoring && (
-        <AddHealthMonitoringForm
-          onSuccess={handleMonitoringSuccess}
-          onError={handleError}
-          initialData={monitoringToEdit}
-          isUpdateMode={!!monitoringToEdit}
-          diagnosisId={diagnosis.id}
-        />
-      )}
+    <div className="form-container">
+      <h2>{isUpdateMode ? 'Update Monitoring Kesehatan' : 'Tambah Monitoring Kesehatan'}</h2>
+      <form onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label htmlFor="diagnosis_id">ID Diagnosa</label>
+          <input
+            type="number"
+            id="diagnosis_id"
+            name="diagnosis_id"
+            value={formData.diagnosis_id}
+            onChange={handleChange}
+            required
+            disabled={!!diagnosisId || isUpdateMode}
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="kota_kejadian">Kota Kejadian</label>
+          <input
+            type="text"
+            id="kota_kejadian"
+            name="kota_kejadian"
+            value={formData.kota_kejadian}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <button type="submit">{isUpdateMode ? 'Simpan Perubahan' : 'Simpan Monitoring'}</button>
+      </form>
     </div>
   );
 }
 
-export default DiagnosisDetailPage;
+export default AddHealthMonitoringForm;

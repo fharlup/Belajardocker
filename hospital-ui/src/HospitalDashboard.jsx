@@ -148,7 +148,6 @@ function HospitalDashboard() {
                 <button onClick={() => handleNavClick('prescriptions')}>Resep</button>
                 <button onClick={() => handleNavClick('health-monitorings')}>Monitoring Kesehatan</button>
                 <button onClick={() => handleNavClick('obat-from-apotek')}>Obat (dari Apotek)</button>
-                <button onClick={() => handleNavClick('health-statistics')}>Statistik Kesehatan</button>
             </nav>
             <nav className="navigation">
                 <p><strong>Tambah Data:</strong></p>

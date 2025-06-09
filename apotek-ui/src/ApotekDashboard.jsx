@@ -130,7 +130,11 @@ function ApotekDashboard() {
   const apiBaseUrl = activeView === 'patients-from-hospital' ? HOSPITAL_API_URL : APOTEK_API_URL;
 
   return (
+
     <div className="container">
+        <header>
+        <h1>Sistem Informasi Apotek</h1>
+      </header>
       <nav className="navigation">
         <p><strong>Lihat Data:</strong></p>
         <button onClick={() => handleNavClick('obat')}>Obat</button>

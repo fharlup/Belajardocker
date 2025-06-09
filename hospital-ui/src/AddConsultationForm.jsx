@@ -1,22 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
-function AddDiagnosisForm({ onSuccess, onError, initialData, isUpdateMode, consultationId }) {
+function AddConsultationForm({ onSuccess, onError }) {
   const [formData, setFormData] = useState({
-    consultation_id: consultationId || '', // Menerima consultationId dari props
-    diagnosis_text: '',
+    patient_id: '',
+    doctor_id: '',
+    symptoms: '',
+    date: '',
   });
-
-  useEffect(() => {
-    if (isUpdateMode && initialData) {
-      setFormData({
-        consultation_id: initialData.consultation_id || '',
-        diagnosis_text: initialData.diagnosis_text || '',
-      });
-    } else if (consultationId) {
-      // Jika mode tambah dan consultationId disediakan, set otomatis
-      setFormData(prev => ({ ...prev, consultation_id: consultationId }));
-    }
-  }, [initialData, isUpdateMode, consultationId]);
 
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -24,35 +14,24 @@ function AddDiagnosisForm({ onSuccess, onError, initialData, isUpdateMode, consu
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const endpoint = isUpdateMode
-        ? `/api-hospital/diagnoses/${initialData.id}` // Jika update, gunakan ID diagnosa yang ada
-        : '/api-hospital/diagnoses';
-      const method = isUpdateMode ? 'PUT' : 'POST';
-
-      const response = await fetch(endpoint, {
-        method,
+      const response = await fetch('/api-hospital/consultations', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
-          consultation_id: parseInt(formData.consultation_id, 10), // Pastikan ID adalah integer
+          patient_id: parseInt(formData.patient_id, 10),
+          doctor_id: parseInt(formData.doctor_id, 10),
         }),
       });
 
       const result = await response.json();
       if (!response.ok || result.status !== 'success') {
-        throw new Error(
-          result.message ||
-          `Gagal ${isUpdateMode ? 'mengupdate' : 'menambahkan'} diagnosa.`
-        );
+        throw new Error(result.message || 'Gagal menambahkan konsultasi.');
       }
 
-      alert(`Diagnosa berhasil ${isUpdateMode ? 'diupdate' : 'ditambahkan'}!`);
-      onSuccess(); // Panggil onSuccess untuk memberi tahu komponen induk agar merefresh data
-      
-      // Reset form jika dalam mode tambah setelah berhasil submit
-      if (!isUpdateMode) {
-        setFormData(prev => ({ ...prev, diagnosis_text: '' }));
-      }
+      alert('Konsultasi berhasil ditambahkan!');
+      onSuccess();
+      setFormData({ patient_id: '', doctor_id: '', symptoms: '', date: '' });
 
     } catch (e) {
       onError(e.message);
@@ -61,36 +40,61 @@ function AddDiagnosisForm({ onSuccess, onError, initialData, isUpdateMode, consu
 
   return (
     <div className="form-container">
-      <h2>{isUpdateMode ? 'Update Diagnosa' : 'Tambah Diagnosa Baru'}</h2>
+      <h2>Tambah Konsultasi Baru</h2>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label htmlFor="consultation_id">ID Konsultasi</label>
+          <label htmlFor="patient_id">ID Pasien</label>
           <input
-            id="consultation_id"
-            name="consultation_id"
+            id="patient_id"
+            name="patient_id"
             type="number"
-            value={formData.consultation_id}
+            value={formData.patient_id}
             onChange={handleChange}
             required
-            disabled={isUpdateMode || consultationId} 
+            min="1"
           />
         </div>
+
         <div className="form-group">
-          <label htmlFor="diagnosis_text">Teks Diagnosa</label>
+          <label htmlFor="doctor_id">ID Dokter</label>
+          <input
+            id="doctor_id"
+            name="doctor_id"
+            type="number"
+            value={formData.doctor_id}
+            onChange={handleChange}
+            required
+            min="1"
+          />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="symptoms">Gejala</label>
           <textarea
-            id="diagnosis_text"
-            name="diagnosis_text"
-            value={formData.diagnosis_text}
+            id="symptoms"
+            name="symptoms"
+            value={formData.symptoms}
             onChange={handleChange}
             required
           />
         </div>
-        <button type="submit">
-          {isUpdateMode ? 'Simpan Perubahan Diagnosa' : 'Simpan Diagnosa'}
-        </button>
+
+        <div className="form-group">
+          <label htmlFor="date">Tanggal Konsultasi</label>
+          <input
+            id="date"
+            name="date"
+            type="date"
+            value={formData.date}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <button type="submit">Simpan Konsultasi</button>
       </form>
     </div>
   );
 }
 
-export default AddDiagnosisForm;
+export default AddConsultationForm;
