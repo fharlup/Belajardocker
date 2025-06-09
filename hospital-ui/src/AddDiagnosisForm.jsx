@@ -3,14 +3,14 @@ import React, { useState, useEffect } from 'react';
 function AddDiagnosisForm({ onSuccess, onError, initialData, isUpdateMode }) {
   const [formData, setFormData] = useState({
     consultation_id: '',
-    diagnosa: '',
+    diagnosis_text: '',
   });
 
   useEffect(() => {
     if (isUpdateMode && initialData) {
       setFormData({
         consultation_id: initialData.consultation_id || '',
-        diagnosa: initialData.diagnosa || '',
+        diagnosis_text: initialData.diagnosis_text || '',
       });
     }
   }, [initialData, isUpdateMode]);
@@ -22,8 +22,8 @@ function AddDiagnosisForm({ onSuccess, onError, initialData, isUpdateMode }) {
     e.preventDefault();
     try {
       const endpoint = isUpdateMode
-        ? `/api-hospital/diagnosis/${initialData.id}`
-        : '/api-hospital/diagnosis';
+        ? `/api-hospital/diagnoses/${initialData.id}`
+        : '/api-hospital/diagnoses';
       const method = isUpdateMode ? 'PUT' : 'POST';
 
       const response = await fetch(endpoint, {
@@ -67,8 +67,8 @@ function AddDiagnosisForm({ onSuccess, onError, initialData, isUpdateMode }) {
         <div className="form-group">
           <label>Diagnosa Penyakit</label>
           <textarea
-            name="diagnosa"
-            value={formData.diagnosa}
+            name="diagnosis_text"
+            value={formData.diagnosis_text}
             onChange={handleChange}
             required
           />
