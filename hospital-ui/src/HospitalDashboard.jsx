@@ -8,10 +8,7 @@ import AddPrescriptionForm from './AddPrescriptionForm';
 import AddHealthMonitoringForm from './AddHealthMonitoringForm';
 
 const HOSPITAL_API_URL = '/api-hospital'; // Proxy ke backend Node.js
-const APOTEK_API_URL = '/api-hospital'; // Proxy ke backend Node.js, yang akan memanggil Apotek
-// const HEALTH_STATS_API_URL = '/api-hospital'; // Proxy ke backend Node.js, yang akan memanggil Health Statistics
 
-// Konfigurasi untuk setiap jenis data yang akan ditampilkan
 const dataConfigs = {
     patients: {
         title: 'Daftar Pasien', endpoint: '/patients', form: 'Patient',
@@ -72,12 +69,14 @@ function HospitalDashboard() {
     const [viewKey, setViewKey] = useState(Date.now());
     const [error, setError] = useState('');
     const [editingItem, setEditingItem] = useState(null);
+    const [obatIdFilter, setObatIdFilter] = useState(''); // State untuk filter ID obat
 
     const handleNavClick = (view) => {
         setActiveView(view);
         setError('');
         setEditingItem(null);
         setViewKey(Date.now()); // Forces DataViewer to re-render
+        setObatIdFilter(''); // Reset filter saat pindah view
     };
 
     const handleUpdate = (item) => {
@@ -94,7 +93,6 @@ function HospitalDashboard() {
         }
         try {
             const endpoint = dataConfigs[activeView].endpoint;
-            // Use HOSPITAL_API_URL for all deletes, as it's the proxy
             const apiBaseUrl = HOSPITAL_API_URL;
             const response = await fetch(`${apiBaseUrl}${endpoint}/${item.id}`, {
                 method: 'DELETE',
@@ -104,7 +102,7 @@ function HospitalDashboard() {
                 throw new Error(result.message || 'Gagal menghapus data.');
             }
             alert('Data berhasil dihapus!');
-            setViewKey(Date.now()); // Refresh list
+            setViewKey(Date.now());
         } catch (e) {
             setError(e.message);
         }
@@ -119,11 +117,6 @@ function HospitalDashboard() {
             isUpdateMode: isUpdate,
             initialData: isUpdate ? editingItem : null,
         };
-
-        // For "Add" forms, you might want to pass parent IDs if coming from a detail page
-        // For this dashboard, users will manually input the parent ID (e.g., consultation_id for diagnoses)
-        // If you had separate detail pages, you'd pass props like `consultationId={someId}`
-        // Example: if (entityName === 'diagnosis') return <AddDiagnosisForm {...props} consultationId={someConsultationId} />;
 
         switch (entityName) {
             case 'patient': return <AddPatientForm {...props} />;
@@ -159,16 +152,40 @@ function HospitalDashboard() {
                 <button className="add-btn" onClick={() => handleNavClick('addHealthMonitoring')}>+ Monitoring</button>
             </nav>
 
+            {/* Filter untuk obat-from-apotek */}
+            {activeView === 'obat-from-apotek' && (
+                <div style={{ margin: '10px 0' }}>
+                    <label>
+                        Filter Obat by ID:{' '}
+                        <input
+                            type="text"
+                            value={obatIdFilter}
+                            onChange={(e) => setObatIdFilter(e.target.value)}
+                            placeholder="Masukkan ID obat"
+                        />
+                    </label>
+                    <button onClick={() => setViewKey(Date.now())}>Apply Filter</button>
+                    <p style={{fontSize: '0.9em', color: '#555'}}>
+                        * Masukkan ID obat untuk filter, kosongkan untuk tampil semua.
+                    </p>
+                </div>
+            )}
+
             {/* Main Content Section */}
             <div className="content">
                 {error && <p className="error-message">Error: {error}</p>}
 
-                {/* Render DataViewer if active view is in dataConfigs */}
+                {/* Render DataViewer jika activeView ada di dataConfigs */}
                 {dataConfigs[activeView] && (
                     <DataViewer
                         key={viewKey}
-                        config={dataConfigs[activeView]}
-                        apiBaseUrl={HOSPITAL_API_URL} // All API calls go through HOSPITAL_API_URL now
+                        config={{
+                            ...dataConfigs[activeView],
+                            endpoint: activeView === 'obat-from-apotek' && obatIdFilter
+                                ? `${dataConfigs[activeView].endpoint}?id=${encodeURIComponent(obatIdFilter)}`
+                                : dataConfigs[activeView].endpoint
+                        }}
+                        apiBaseUrl={HOSPITAL_API_URL}
                         onError={setError}
                         onUpdate={handleUpdate}
                         onDelete={handleDelete}

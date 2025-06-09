@@ -54,13 +54,11 @@ const dataConfigs = {
     ],
   },
   'patients-from-hospital': {
-    title: 'Data Pasien dari Hospital',
-    endpoint: '/patients',
+    title: 'Diganosa',
+    endpoint: '/diagnoses',
     columns: [
       { key: 'id', header: 'ID' },
-      { key: 'name', header: 'Nama Pasien' },
-      { key: 'age', header: 'Umur' },
-      { key: 'address', header: 'Alamat' },
+      { key: 'diagnosis_text', header: 'Nama Pasien' },
     ],
   },
 };
